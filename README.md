@@ -1,6 +1,6 @@
-# Golang Locker
+# Lightweight Golang Locker
 
-Utility `locker` - simple Golang locker based on map of mutex.
+Utility `locker` - simple and lightweight Golang locker based on map of RWMutexes
 
 ## Installation:
 
@@ -20,3 +20,24 @@ locker.Lock("key")
 <code>
 locker.Unlock("key")
 ```
+
+To lock only read:
+
+```
+locker := locker.Initialize()
+locker.RLock("key")
+<code>
+locker.RUnlock("key")
+```
+
+## Test:
+
+To run tests:
+
+```
+go test
+```
+
+## Links:
+
+[Good explenation](https://stackoverflow.com/a/19168242/10052381) of sync package and why is RWMutex with RLock are useful
