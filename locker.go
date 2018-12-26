@@ -20,15 +20,15 @@ func initLock() *lock {
 
 // Locker type for map of mutexes and self lock to add new mutex to map
 type Locker struct {
-	locks    map[string]*lock
-	selfLock *sync.RWMutex
+	locks    sync.Map
+	selfLock sync.RWMutex
 }
 
 // Initialize - return initialized locker struct
 func Initialize() *Locker {
 	return &Locker{
-		locks:    make(map[string]*lock),
-		selfLock: new(sync.RWMutex),
+		locks:    sync.Map{},
+		selfLock: sync.RWMutex{},
 	}
 }
 
@@ -46,6 +46,7 @@ func (lkr *Locker) Lock(key string) {
 func (lkr *Locker) Unlock(key string) {
 	lk, ok := lkr.getLock(key)
 	if !ok {
+		// Todo: Doesn't get here
 		panic(fmt.Errorf("Lock for key '%s' is not initialized", key))
 	}
 	atomic.AddInt32(&lk.pending, -1)
@@ -69,6 +70,7 @@ func (lkr *Locker) RLock(key string) {
 func (lkr *Locker) RUnlock(key string) {
 	lk, ok := lkr.getLock(key)
 	if !ok {
+		// Todo: Doesn't get here
 		panic(fmt.Errorf("Lock for key '%s' is not initialized", key))
 	}
 	atomic.AddInt32(&lk.pending, -1)
@@ -82,11 +84,11 @@ func (lkr *Locker) newLock(key string) *lock {
 	lkr.selfLock.Lock()
 	defer lkr.selfLock.Unlock()
 
-	if lk, ok := lkr.locks[key]; ok {
-		return lk
+	if lk, ok := lkr.locks.Load(key); ok {
+		return lk.(*lock)
 	}
 	lk := initLock()
-	lkr.locks[key] = lk
+	lkr.locks.Store(key, lk)
 	return lk
 }
 
@@ -94,15 +96,17 @@ func (lkr *Locker) getLock(key string) (*lock, bool) {
 	lkr.selfLock.RLock()
 	defer lkr.selfLock.RUnlock()
 
-	lock, ok := lkr.locks[key]
-	return lock, ok
+	if lk, ok := lkr.locks.Load(key); ok {
+		return lk.(*lock), ok
+	}
+	return nil, false
 }
 
 func (lkr *Locker) remLock(key string) {
 	lkr.selfLock.Lock()
 	defer lkr.selfLock.Unlock()
 
-	if _, ok := lkr.locks[key]; ok {
-		delete(lkr.locks, key)
+	if _, ok := lkr.locks.Load(key); ok {
+		lkr.locks.Delete(key)
 	}
 }
