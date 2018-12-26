@@ -41,4 +41,5 @@ go test
 ## Links:
 
 [Good explanation](https://stackoverflow.com/a/19168242/10052381) of sync package and why is RWMutex with RLock are useful
+
 [Reddit](https://www.reddit.com/r/golang/comments/a9j0we/enfipylocker_lightweight_named_locker_based_on/) post
