@@ -4,14 +4,14 @@ import "sync"
 
 // Locker type for map of mutexes and self lock to add new mutex to map
 type Locker struct {
-	sync.Pool
+	pool  sync.Pool
 	locks sync.Map
 }
 
 // Initialize - return initialized locker struct
 func Initialize() *Locker {
 	return &Locker{
-		Pool: sync.Pool{
+		pool: sync.Pool{
 			New: func() interface{} {
 				return new(sync.RWMutex)
 			},
@@ -40,10 +40,10 @@ func (lkr *Locker) RUnlock(key interface{}) {
 }
 
 func (lkr *Locker) getLock(key interface{}) *sync.RWMutex {
-	newLock := lkr.Get()
+	newLock := lkr.pool.Get()
 	lock, stored := lkr.locks.LoadOrStore(key, newLock)
 	if stored {
-		lkr.Put(newLock)
+		lkr.pool.Put(newLock)
 	}
 	return lock.(*sync.RWMutex)
 }

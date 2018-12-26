@@ -1,6 +1,6 @@
 # Lightweight Golang Locker
 
-Utility `locker` - simple and lightweight Golang locker based on map of RWMutexes
+Utility `locker` - simple and lightweight Golang locker based on sync.Map and sync.Pool
 
 ## Installation:
 
@@ -42,4 +42,4 @@ go test
 
 [Good explanation](https://stackoverflow.com/a/19168242/10052381) of sync package and why is RWMutex with RLock are useful
 
-[Reddit](https://www.reddit.com/r/golang/comments/a9j0we/enfipylocker_lightweight_named_locker_based_on/) post
+[Reddit post](https://www.reddit.com/r/golang/comments/a9j0we/enfipylocker_lightweight_named_locker_based_on/) where we discussed why removing the mutex after unlocking is worse than keeping
