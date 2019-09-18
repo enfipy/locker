@@ -20,8 +20,11 @@ func Initialize() *Locker {
 }
 
 // Lock - locks mutex
-func (lkr *Locker) Lock(key interface{}) {
+func (lkr *Locker) Lock(key interface{}) func() {
 	lkr.getLock(key).Lock()
+	return func() {
+		lkr.getLock(key).Unlock()
+	}
 }
 
 // Unlock - unlocks mutex
@@ -30,8 +33,11 @@ func (lkr *Locker) Unlock(key interface{}) {
 }
 
 // RLock - locks rw for reading
-func (lkr *Locker) RLock(key interface{}) {
+func (lkr *Locker) RLock(key interface{}) func() {
 	lkr.getLock(key).RLock()
+	return func() {
+		lkr.getLock(key).RUnlock()
+	}
 }
 
 // RUnlock - unlocks a single RLock call
